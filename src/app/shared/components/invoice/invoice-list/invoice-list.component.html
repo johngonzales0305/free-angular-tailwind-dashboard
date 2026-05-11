@@ -25,8 +25,8 @@
               <p class="text-xs text-gray-500">{{product.sku}}</p>
             </td>
             <td class="p-4">
-              <span [ngClass]="product.stock < 10 ? 'text-error-600' : 'text-gray-700'" class="text-sm font-medium">
-                {{product.stock}} in stock
+              <span [ngClass]="(product.stock - product.toSell) < 10 ? 'text-red-500' : 'text-gray-700'" class="text-sm font-medium">
+                {{ product.stock - product.toSell }} in stock
               </span>
             </td>
             <td class="p-4 text-sm text-gray-700 dark:text-gray-400">

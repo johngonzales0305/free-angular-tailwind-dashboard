@@ -33,12 +33,15 @@ export class InvoiceListComponent {
   updateQty(index: number, change: number) {
     this.products.update(prev => {
       const updated = [...prev];
-      const product = updated[index];
+      const product = { ...updated[index] }; // Create a shallow copy of the object
       const newQty = product.toSell + change;
-
-      // Prevent negative sales or exceeding current stock
+  
+      // Boundary Checks: 
+      // 1. Cannot go below 0
+      // 2. Cannot exceed the physical stock available
       if (newQty >= 0 && newQty <= product.stock) {
         product.toSell = newQty;
+        updated[index] = product; // Re-insert the updated object
       }
       return updated;
     });
