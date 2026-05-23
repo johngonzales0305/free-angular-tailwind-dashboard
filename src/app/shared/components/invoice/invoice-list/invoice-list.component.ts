@@ -1,17 +1,7 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Product {
-  id: number;
-  name: string;
-  sku: string;
-  price: number;
-  stock: number;
-  toSell: number;
-  lastUpdated: Date;       // Tracks stock updates
-  priceLastUpdated: Date;  // Tracks unit price updates
-}
+import { ProductService, Product } from '../../../services/product.service';
 
 interface Transaction {
   id: string;
@@ -28,78 +18,117 @@ interface Transaction {
   templateUrl: './invoice-list.component.html',
 })
 export class InvoiceListComponent {
+  private productService = inject(ProductService);
+  
+  // Expose Math to the template for page calculations
+  public Math = Math;
+  
   public isEditing = signal<boolean>(false);
+  public searchTerm = signal<string>('');
+  public sortColumn = signal<keyof Product | null>(null);
+  public sortDirection = signal<'asc' | 'desc'>('asc');
+  
+  // Pagination signals
+  public currentPage = signal<number>(1);
+  public pageSize = signal<number>(5);
 
-  public products = signal<Product[]>([
-    { id: 1, name: 'Premium watches', sku: 'BP-001', price: 1250.00, stock: 45, toSell: 0, lastUpdated: new Date('2026-05-10T09:30:00'), priceLastUpdated: new Date('2026-05-10T09:30:00') },
-    { id: 2, name: 'Premium bags', sku: 'EO-102', price: 2800.00, stock: 12, toSell: 0, lastUpdated: new Date('2026-05-12T14:15:00'), priceLastUpdated: new Date('2026-05-12T14:15:00') },
-    { id: 3, name: 'Air cooler', sku: 'AF-552', price: 450.00, stock: 30, toSell: 0, lastUpdated: new Date('2026-05-15T11:00:00'), priceLastUpdated: new Date('2026-05-15T11:00:00') },
-  ]);
-
+  public products = this.productService.allProducts;
   public completedTransactions = signal<Transaction[]>([]);
 
-  public totalToSell = computed(() => {
-    return this.products().reduce((acc, p) => acc + (p.price * p.toSell), 0);
+  // Filtering & Sorting Logic
+  public filteredProducts = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    let data = [...this.products().filter(p => 
+      p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
+    )];
+
+    const col = this.sortColumn();
+    if (col) {
+      data.sort((a, b) => {
+        let valA: any = a[col];
+        let valB: any = b[col];
+        if (valA instanceof Date) valA = valA.getTime();
+        if (valB instanceof Date) valB = valB.getTime();
+        return this.sortDirection() === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+      });
+    }
+    return data;
   });
 
-  public selectedCount = computed(() => {
-    return this.products().filter(p => p.toSell > 0).length;
+  // Paginated View
+  public paginatedProducts = computed(() => {
+    return this.productService.getPagedData(this.filteredProducts(), this.currentPage(), this.pageSize());
   });
 
-  public cumulativeRevenue = computed(() => {
-    return this.completedTransactions().reduce((acc, tx) => acc + tx.totalRevenue, 0);
-  });
+  // Revenue computations
+  public totalToSell = computed(() => this.products().reduce((acc, p) => acc + (p.price * p.toSell), 0));
+  public selectedCount = computed(() => this.products().filter(p => p.toSell > 0).length);
+  public cumulativeRevenue = computed(() => this.completedTransactions().reduce((acc, tx) => acc + tx.totalRevenue, 0));
 
-  toggleEdit() {
-    this.isEditing.set(!this.isEditing());
+  // Methods
+  toggleEdit() { this.isEditing.set(!this.isEditing()); }
+
+  setSort(column: keyof Product) {
+    if (this.sortColumn() === column) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortColumn.set(column);
+      this.sortDirection.set('asc');
+    }
   }
 
-  updateQty(index: number, change: number) {
+  // Pagination Controls
+  changePage(page: number) { this.currentPage.set(page); }
+
+  changePageSize(event: Event) {
+    const size = parseInt((event.target as HTMLSelectElement).value, 10);
+    this.pageSize.set(size);
+    this.currentPage.set(1); // Reset to first page whenever size changes
+  }
+
+  private findProductIndex(id: number): number { return this.products().findIndex(p => p.id === id); }
+
+  updateQty(productId: number, change: number) {
+    const index = this.findProductIndex(productId);
     this.products.update(prev => {
       const updated = [...prev];
-      const product = { ...updated[index] };
-      const newQty = product.toSell + change;
-
-      if (newQty >= 0 && newQty <= product.stock) {
-        product.toSell = newQty;
-        updated[index] = product;
+      if (updated[index].toSell + change >= 0 && updated[index].toSell + change <= updated[index].stock) {
+        updated[index] = { ...updated[index], toSell: updated[index].toSell + change };
       }
       return updated;
     });
   }
 
-  updateBaseStock(index: number, newStock: number) {
+  setQty(productId: number, newQty: number | null) {
+    const quantity = Math.max(0, newQty ?? 0);
+    const index = this.findProductIndex(productId);
     this.products.update(prev => {
       const updated = [...prev];
-      const validatedStock = Math.max(newStock || 0, updated[index].toSell);
-      
-      updated[index] = { 
-        ...updated[index], 
-        stock: validatedStock,
-        lastUpdated: new Date()
-      };
+      updated[index] = { ...updated[index], toSell: Math.min(quantity, updated[index].stock) };
       return updated;
     });
   }
 
-  updateUnitPrice(index: number, newPrice: number) {
+  updateBaseStock(productId: number, newStock: number) {
+    const index = this.findProductIndex(productId);
     this.products.update(prev => {
       const updated = [...prev];
-      const validatedPrice = Math.max(newPrice || 0, 0);
-      
-      updated[index] = {
-        ...updated[index],
-        price: validatedPrice,
-        priceLastUpdated: new Date() // Refreshes the price-specific timestamp instantly
-      };
+      updated[index] = { ...updated[index], stock: Math.max(newStock || 0, updated[index].toSell), lastUpdated: new Date() };
+      return updated;
+    });
+  }
+
+  updateUnitPrice(productId: number, newPrice: number) {
+    const index = this.findProductIndex(productId);
+    this.products.update(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], price: Math.max(newPrice || 0, 0), priceLastUpdated: new Date() };
       return updated;
     });
   }
 
   submitTransaction() {
-    const currentProducts = this.products();
-    const activeSales = currentProducts.filter(p => p.toSell > 0);
-
+    const activeSales = this.products().filter(p => p.toSell > 0);
     if (activeSales.length === 0) return;
 
     const newTransaction: Transaction = {
@@ -107,27 +136,10 @@ export class InvoiceListComponent {
       timestamp: new Date(),
       itemsCount: activeSales.reduce((acc, p) => acc + p.toSell, 0),
       totalRevenue: this.totalToSell(),
-      details: activeSales.map(p => ({
-        productName: p.name,
-        qtySold: p.toSell,
-        subtotal: p.price * p.toSell
-      }))
+      details: activeSales.map(p => ({ productName: p.name, qtySold: p.toSell, subtotal: p.price * p.toSell }))
     };
 
-    this.products.update(prev => 
-      prev.map(p => {
-        if (p.toSell > 0) {
-          return {
-            ...p,
-            stock: p.stock - p.toSell,
-            toSell: 0,
-            lastUpdated: new Date() // Deducting items modifies stock levels, so we update this too
-          };
-        }
-        return p;
-      })
-    );
-
+    this.products.update(prev => prev.map(p => p.toSell > 0 ? { ...p, stock: p.stock - p.toSell, toSell: 0, lastUpdated: new Date() } : p));
     this.completedTransactions.update(prev => [newTransaction, ...prev]);
   }
 }
