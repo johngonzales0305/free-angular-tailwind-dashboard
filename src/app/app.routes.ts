@@ -34,14 +34,14 @@ export const routes: Routes = [
         component: EcommerceComponent,
         pathMatch: 'full',
         title:
-          'Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template',
+          'LT Solutions',
       },
       {
         path:'products',
         component: ProductListTableComponent,
         pathMatch: 'full',
         title:
-          'Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template',
+          'LT Solutions',
       },
       
       {
@@ -49,24 +49,24 @@ export const routes: Routes = [
         component: AddProductFormComponent,
         pathMatch: 'full',
         title:
-          'Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template',
+          'LT Solutions',
       },
       {
         path:'invoices',
         component: InvoicesComponent,
         pathMatch: 'full',
         title:
-          'Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template',
+          'LT Solutions',
       },
       {
         path:'calendar',
         component:CalenderComponent,
-        title:'Angular Calender | TailAdmin - Angular Admin Dashboard Template'
+        title:'LT Solutions'
       },
       {
         path:'profile',
         component:ProfileComponent,
-        title:'Angular Profile Dashboard | TailAdmin - Angular Admin Dashboard Template'
+        title:'LT Solutions Profile Dashboard'
       },
       {
         path: 'product-list', // The URL path
@@ -76,7 +76,7 @@ export const routes: Routes = [
       {
         path:'form-elements',
         component:FormElementsComponent,
-        title:'Angular Form Elements Dashboard | TailAdmin - Angular Admin Dashboard Template'
+        title:'LT Solutions Form Elements Dashboard'
       },
       {
         path:'basic-tables',
