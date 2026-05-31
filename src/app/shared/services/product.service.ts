@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 
 export interface Product {
   id: number;
@@ -11,8 +11,17 @@ export interface Product {
   priceLastUpdated: Date;
 }
 
+export interface Transaction {
+  id: string;
+  timestamp: Date;
+  itemsCount: number;
+  totalRevenue: number;
+  details: { productName: string; qtySold: number; subtotal: number }[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
+  // Initial Data Set
   private initialData: Product[] = [
     { id: 1, name: 'Premium watches', sku: 'BP-001', price: 1250.00, stock: 45, toSell: 0, lastUpdated: new Date(), priceLastUpdated: new Date() },
     { id: 2, name: 'Premium bags', sku: 'EO-102', price: 2800.00, stock: 12, toSell: 0, lastUpdated: new Date(), priceLastUpdated: new Date() },
@@ -41,8 +50,38 @@ export class ProductService {
     { id: 25, name: 'Portable SSD 500GB', sku: 'PS-500', price: 2800.00, stock: 25, toSell: 0, lastUpdated: new Date(), priceLastUpdated: new Date() }
   ];
 
+  // State Management
   public allProducts = signal<Product[]>(this.initialData);
+  public completedTransactions = signal<Transaction[]>([]);
 
+  /**
+   * Adds a new product to the central signal state.
+   * Maps partial form data to the full Product model.
+   */
+  addProduct(newProduct: any) {
+    const product: Product = {
+      id: Date.now(), // Generate a unique ID
+      name: newProduct.name,
+      sku: newProduct.sku,
+      price: Number(newProduct.price),
+      stock: Number(newProduct.stock),
+      toSell: 0,
+      lastUpdated: new Date(),
+      priceLastUpdated: new Date()
+    };
+  
+    this.allProducts.update(products => [...products, product]);
+  }
+  /**
+   * Adds a transaction to the history.
+   */
+  addTransaction(tx: Transaction) {
+    this.completedTransactions.update(prev => [tx, ...prev]);
+  }
+
+  /**
+   * Helper for table pagination logic.
+   */
   getPagedData(data: Product[], page: number, pageSize: number): Product[] {
     const startIndex = (page - 1) * pageSize;
     return data.slice(startIndex, startIndex + pageSize);

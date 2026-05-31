@@ -1,77 +1,55 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LabelComponent } from '../../form/label/label.component';
-import { InputFieldComponent } from '../../form/input/input-field.component';
-import { SelectComponent } from '../../form/select/select.component';
-import { TextAreaComponent } from '../../form/input/text-area.component';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '../../ui/button/button.component';
+import { LabelComponent } from '../../form/label/label.component';
 
 @Component({
   selector: 'app-add-product-form',
+  standalone: true,
   imports: [
     CommonModule,
-    LabelComponent,
-    InputFieldComponent,
-    SelectComponent,
-    TextAreaComponent,
-    ButtonComponent
+    ReactiveFormsModule,
+    ButtonComponent,
+    LabelComponent
   ],
-  templateUrl: './add-product-form.component.html',
-  styles: ``
+  templateUrl: './add-product-form.component.html'
 })
 export class AddProductFormComponent {
+  private fb = inject(FormBuilder);
+  
+  @Output() save = new EventEmitter<any>();
+  @Output() cancel = new EventEmitter<void>();
 
-  categories = [
-    { value: 'Laptop', label: 'Laptop' },
-    { value: 'Phone', label: 'Phone' },
-    { value: 'Watch', label: 'Watch' },
-    { value: 'Electronics', label: 'Electronics' },
-    { value: 'Accessories', label: 'Accessories' }
-  ];
+  // Form definition matched to Product interface
+  productForm: FormGroup = this.fb.group({
+    name: ['', [Validators.required]],
+    sku: ['', [Validators.required]],
+    price: [0, [Validators.required, Validators.min(0)]],
+    stock: [0, [Validators.required, Validators.min(0)]],
+    description: [''] // Included for flexibility
+  });
 
-  brands = [
-    { value: '1', label: 'Apple' },
-    { value: '2', label: 'Samsung' },
-    { value: '3', label: 'LG' }
-  ];
-
-  availability = [
-    { value: '1', label: 'In Stock' },
-    { value: '2', label: 'Out of Stock' }
-  ];
-
-  colors = [
-    { value: '1', label: 'Silver' },
-    { value: '2', label: 'Black' },
-    { value: '3', label: 'White' },
-    { value: '4', label: 'Gray' }
-  ];
-
-  stockQuantity: number = 1;
-
-  handleSelectChange(value: string) {
-    console.log('Selected value:', value);
-  }
-
+  // Quantity increment/decrement logic
   incrementQuantity() {
-    this.stockQuantity++;
+    const currentStock = this.productForm.get('stock')?.value || 0;
+    this.productForm.patchValue({ stock: currentStock + 1 });
   }
 
   decrementQuantity() {
-    if (this.stockQuantity > 0) {
-      this.stockQuantity--;
+    const currentStock = this.productForm.get('stock')?.value || 0;
+    if (currentStock > 0) {
+      this.productForm.patchValue({ stock: currentStock - 1 });
     }
   }
 
-  updateQuantity(value: string | number) {
-    this.stockQuantity = typeof value === 'string' ? parseInt(value) || 0 : value;
-  }
-
-  onDraft() {
-    console.log('Draft button clicked');
-  }
-
   onPublish() {
-    console.log('Publish Product button clicked');
+    if (this.productForm.valid) {
+      console.log('Form data being emitted:', this.productForm.value); // Add this to debug
+      this.save.emit(this.productForm.value);
+    } else {
+      this.productForm.markAllAsTouched();
+      console.log('Form is invalid');
+    }
   }
 }
