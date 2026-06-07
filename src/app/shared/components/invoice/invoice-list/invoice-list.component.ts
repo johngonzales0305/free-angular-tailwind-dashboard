@@ -75,13 +75,18 @@ export class InvoiceListComponent {
 
   // 2. Added Implementation for setQty (Fixes TS2339 on setQty)
   setQty(productId: number, newQty: any) {
+    // Convert input to a valid number
     const quantity = Math.max(0, parseInt(newQty, 10) || 0);
     const index = this.findProductIndex(productId);
+    
     this.products.update(prev => {
       const updated = [...prev];
-      if (quantity <= updated[index].stock) {
-        updated[index] = { ...updated[index], toSell: quantity };
-      }
+      const product = updated[index];
+  
+      // Force the value to not exceed the available stock
+      const validatedQty = Math.min(quantity, product.stock);
+      
+      updated[index] = { ...updated[index], toSell: validatedQty };
       return updated;
     });
   }
