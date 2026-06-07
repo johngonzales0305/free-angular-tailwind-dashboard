@@ -13,66 +13,101 @@
   </button>
 </div>
 
-
 <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800">
   <table class="w-full text-sm text-left">
-    <thead class="text-xs text-gray-500 uppercase border-b border-gray-200 dark:border-gray-800">
+    <thead class="text-xs text-gray-500 uppercase border-b border-gray-200 dark:border-gray-800 bg-gray-50">
       <tr>
         <th class="px-5 py-4 w-10"><input type="checkbox" (change)="toggleAll()" [checked]="isAllSelected()"></th>
         <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('name')">Product</th>
         <th class="px-5 py-4">SKU</th>
         <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('price')">Price</th>
         <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('stock')">Stock Level</th>
-        <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('lastUpdated')">Last Updated</th>
-        <th class="px-5 py-4"></th>
+        <th class="px-5 py-4">Last Updated</th>
+        <th class="px-5 py-4 text-right">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
       @for (product of paginatedProducts(); track product.id) {
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 transition">
           <td class="px-5 py-4"><input type="checkbox" [checked]="selected().includes(product.id)" (change)="toggleSelect(product.id)"></td>
-          <td class="px-5 py-4 font-medium text-gray-700">{{ product.name }}</td>
-          <td class="px-5 py-4 text-gray-500">{{ product.sku }}</td>
-          <td class="px-5 py-4 text-gray-700">{{ product.price | currency:'PHP' }}</td>
-          <td class="px-5 py-4">
-            <span [class]="product.stock > 10 ? 'text-green-600' : 'text-red-600'">{{ product.stock }} units</span>
+          
+          <td class="px-5 py-4 font-medium text-gray-700">
+            @if (editingId() === product.id) {
+              <input [(ngModel)]="tempProduct()!.name" class="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+            } @else { {{ product.name }} }
           </td>
+
+          <td class="px-5 py-4 text-gray-500">
+            @if (editingId() === product.id) {
+              <input [(ngModel)]="tempProduct()!.sku" class="w-24 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+            } @else { {{ product.sku }} }
+          </td>
+
+          <td class="px-5 py-4 text-gray-700">
+            @if (editingId() === product.id) {
+              <input type="number" [(ngModel)]="tempProduct()!.price" class="w-24 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+            } @else { {{ product.price | currency:'PHP' }} }
+          </td>
+
+          <td class="px-5 py-4">
+            @if (editingId() === product.id) {
+              <input type="number" [(ngModel)]="tempProduct()!.stock" class="w-20 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+            } @else { 
+              <span [class]="product.stock > 10 ? 'text-green-600' : 'text-red-600'">
+                {{ product.stock }} units
+              </span> 
+            }
+          </td>
+
           <td class="px-5 py-4 text-gray-500">{{ product.lastUpdated | date:'dd MMM, yyyy' }}</td>
-          <td class="px-5 py-4 text-right"><app-table-dropdown></app-table-dropdown></td>
+
+          <td class="px-5 py-4 text-right">
+            @if (editingId() === product.id) {
+              <div class="flex justify-end gap-2">
+                <button (click)="saveEdit()" class="text-green-600 font-bold hover:text-green-800">Save</button>
+                <button (click)="cancelEdit()" class="text-red-600 font-bold hover:text-red-800">Cancel</button>
+              </div>
+            } @else {
+              <button (click)="startEdit(product)" class="text-blue-600 hover:underline">Edit</button>
+            }
+          </td>
         </tr>
       }
     </tbody>
   </table>
 
   <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4">
+    <div class="flex items-center gap-2">
+      <span class="text-sm text-gray-500">Rows per page:</span>
+      <select (change)="changePerPage($event)" class="border rounded-md px-2 py-1 text-sm dark:bg-gray-800">
+        <option value="5" [selected]="perPage() === 5">5</option>
+        <option value="10" [selected]="perPage() === 10">10</option>
+        <option value="25" [selected]="perPage() === 25">25</option>
+        <option value="50" [selected]="perPage() === 50">50</option>
+        <option value="100" [selected]="perPage() === 100">100</option>
+      </select>
+    </div>
+
     <span class="text-sm text-gray-500">
-      Showing {{ (page() - 1) * perPage + 1 }} to {{ Math.min(page() * perPage, filteredAndSorted().length) }} of {{ filteredAndSorted().length }} results
+      Showing {{ (page() - 1) * perPage() + 1 }} to {{ Math.min(page() * perPage(), filteredAndSorted().length) }} of {{ filteredAndSorted().length }} results
     </span>
+
     <div class="flex gap-2">
       <button (click)="prevPage()" [disabled]="page() === 1" class="px-3 py-1 border rounded-lg disabled:opacity-50">Prev</button>
-      @for (n of [].constructor(totalPages()); track $index; let i = $index) {
-        <button (click)="goToPage(i + 1)" [class.bg-blue-600]="page() === i + 1" [class.text-white]="page() === i + 1" class="px-3 py-1 border rounded-lg transition-colors">
-          {{ i + 1 }}
-        </button>
-      }
       <button (click)="nextPage()" [disabled]="page() === totalPages()" class="px-3 py-1 border rounded-lg disabled:opacity-50">Next</button>
     </div>
   </div>
 </div>
 
-
 @if (isAddModalOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
+  <div class="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl dark:bg-gray-900 overflow-hidden">
       <div class="flex items-center justify-between border-b px-6 py-4">
         <h2 class="text-lg font-bold">Add New Product</h2>
-        <button (click)="closeAddModal()">✕</button>
+        <button (click)="closeAddModal()" class="text-gray-500 hover:text-black">✕</button>
       </div>
-      <div class="p-6">
-        <app-add-product-form 
-          (save)="onProductAdded($event)" 
-          (cancel)="closeAddModal()">
-        </app-add-product-form>
+      <div class="p-6 overflow-y-auto">
+        <app-add-product-form (save)="onProductAdded($event)" (cancel)="closeAddModal()"></app-add-product-form>
       </div>
     </div>
   </div>

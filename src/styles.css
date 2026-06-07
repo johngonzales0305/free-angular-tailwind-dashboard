@@ -866,3 +866,15 @@ pre[class*="language-"] {
 pre[class*="language-"].line-numbers {
   padding-left: 2.8em !important;
 }
+
+
+:root {
+  --z-sidebar: 1000;
+  --z-header: 1000;
+  --z-modal: 9999; /* Higher than header and sidebar */
+}
+
+/* Ensure the header respects the variable */
+header {
+  z-index: var(--z-header);
+}

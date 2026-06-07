@@ -86,4 +86,10 @@ export class ProductService {
     const startIndex = (page - 1) * pageSize;
     return data.slice(startIndex, startIndex + pageSize);
   }
+
+  updateProduct(updatedProduct: Product) {
+    this.allProducts.update(products => 
+      products.map(p => p.id === updatedProduct.id ? updatedProduct : p)
+    );
+  }
 }
