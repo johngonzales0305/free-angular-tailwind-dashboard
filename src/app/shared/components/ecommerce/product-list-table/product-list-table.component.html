@@ -4,13 +4,15 @@
     placeholder="Search products..." 
     [ngModel]="searchQuery()" 
     (ngModelChange)="searchQuery.set($event)"
-    class="w-full md:w-64 px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    class="w-full md:w-64 px-4 py-2 border rounded-lg border-gray-300 bg-transparent text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800"
   >
-  <button 
-    (click)="openAddModal()" 
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
-    <span>+ Add Product</span>
-  </button>
+  <app-button
+    variant="primary"
+    size="sm"
+    startIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    (btnClick)="openAddModal()">
+    Add Product
+  </app-button>
 </div>
 
 <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800">
@@ -18,10 +20,10 @@
     <thead class="text-xs text-gray-500 uppercase border-b border-gray-200 dark:border-gray-800 bg-gray-50">
       <tr>
         <th class="px-5 py-4 w-10"><input type="checkbox" (change)="toggleAll()" [checked]="isAllSelected()"></th>
-        <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('name')">Product</th>
+        <th class="px-5 py-4 cursor-pointer hover:text-brand-500" (click)="sortBy('name')">Product</th>
         <th class="px-5 py-4">SKU</th>
-        <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('price')">Price</th>
-        <th class="px-5 py-4 cursor-pointer hover:text-blue-600" (click)="sortBy('stock')">Stock Level</th>
+        <th class="px-5 py-4 cursor-pointer hover:text-brand-500" (click)="sortBy('price')">Price</th>
+        <th class="px-5 py-4 cursor-pointer hover:text-brand-500" (click)="sortBy('stock')">Stock Level</th>
         <th class="px-5 py-4">Last Updated</th>
         <th class="px-5 py-4 text-right">Actions</th>
       </tr>
@@ -31,29 +33,29 @@
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 transition">
           <td class="px-5 py-4"><input type="checkbox" [checked]="selected().includes(product.id)" (change)="toggleSelect(product.id)"></td>
           
-          <td class="px-5 py-4 font-medium text-gray-700">
+          <td class="px-5 py-4 font-medium text-gray-700 dark:text-gray-400">
             @if (editingId() === product.id) {
-              <input [(ngModel)]="tempProduct()!.name" class="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+              <input [(ngModel)]="tempProduct()!.name" class="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300">
             } @else { {{ product.name }} }
           </td>
 
-          <td class="px-5 py-4 text-gray-500">
+          <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
             @if (editingId() === product.id) {
-              <input [(ngModel)]="tempProduct()!.sku" class="w-24 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+              <input [(ngModel)]="tempProduct()!.sku" class="w-24 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300">
             } @else { {{ product.sku }} }
           </td>
 
-          <td class="px-5 py-4 text-gray-700">
+          <td class="px-5 py-4 text-gray-700 dark:text-gray-400">
             @if (editingId() === product.id) {
-              <input type="number" [(ngModel)]="tempProduct()!.price" class="w-24 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+              <input type="number" [(ngModel)]="tempProduct()!.price" class="w-24 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300">
             } @else { {{ product.price | currency:'PHP' }} }
           </td>
 
           <td class="px-5 py-4">
             @if (editingId() === product.id) {
-              <input type="number" [(ngModel)]="tempProduct()!.stock" class="w-20 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500">
+              <input type="number" [(ngModel)]="tempProduct()!.stock" class="w-20 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300">
             } @else { 
-              <span [class]="product.stock > 10 ? 'text-green-600' : 'text-red-600'">
+              <span [class]="product.stock > 10 ? 'text-success-600 dark:text-success-500' : 'text-error-600 dark:text-error-500'">
                 {{ product.stock }} units
               </span> 
             }
@@ -64,11 +66,11 @@
           <td class="px-5 py-4 text-right">
             @if (editingId() === product.id) {
               <div class="flex justify-end gap-2">
-                <button (click)="saveEdit()" class="text-green-600 font-bold hover:text-green-800">Save</button>
-                <button (click)="cancelEdit()" class="text-red-600 font-bold hover:text-red-800">Cancel</button>
+                <button (click)="saveEdit()" class="font-medium text-success-600 transition hover:text-success-700 dark:text-success-500 dark:hover:text-success-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium  transition shadow-sm">Save</button>
+                <button (click)="cancelEdit()" class="font-medium text-error-600 transition hover:text-error-700 dark:text-error-500 dark:hover:text-error-400  gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Cancel</button>
               </div>
             } @else {
-              <button (click)="startEdit(product)" class="text-blue-600 hover:underline">Edit</button>
+              <button (click)="startEdit(product)" class="font-medium text-brand-500 transition hover:text-brand-600 dark:hover:text-brand-400   gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Edit</button>
             }
           </td>
         </tr>
@@ -93,8 +95,8 @@
     </span>
 
     <div class="flex gap-2">
-      <button (click)="prevPage()" [disabled]="page() === 1" class="px-3 py-1 border rounded-lg disabled:opacity-50">Prev</button>
-      <button (click)="nextPage()" [disabled]="page() === totalPages()" class="px-3 py-1 border rounded-lg disabled:opacity-50">Next</button>
+      <app-button variant="outline" size="sm" [disabled]="page() === 1" (btnClick)="prevPage()">Prev</app-button>
+      <app-button variant="outline" size="sm" [disabled]="page() === totalPages()" (btnClick)="nextPage()">Next</app-button>
     </div>
   </div>
 </div>
@@ -103,8 +105,8 @@
   <div class="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl dark:bg-gray-900 overflow-hidden">
       <div class="flex items-center justify-between border-b px-6 py-4">
-        <h2 class="text-lg font-bold">Add New Product</h2>
-        <button (click)="closeAddModal()" class="text-gray-500 hover:text-black">✕</button>
+        <h2 class="text-lg font-bold dark:text-white/90">Add New Product</h2>
+        <button (click)="closeAddModal()" class="text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90">✕</button>
       </div>
       <div class="p-6 overflow-y-auto">
         <app-add-product-form (save)="onProductAdded($event)" (cancel)="closeAddModal()"></app-add-product-form>

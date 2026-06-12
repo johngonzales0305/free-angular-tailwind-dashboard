@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ProductService, Product } from '../../../services/product.service';
 import { TableDropdownComponent } from '../../common/table-dropdown/table-dropdown.component';
 import { AddProductFormComponent } from '../add-product-form/add-product-form.component'; 
+import { ButtonComponent } from '../../ui/button/button.component';
 
 @Component({
   selector: 'app-product-list-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableDropdownComponent, AddProductFormComponent],
+  imports: [CommonModule, FormsModule, TableDropdownComponent, AddProductFormComponent, ButtonComponent],
   templateUrl: './product-list-table.component.html'
 })
 export class ProductListTableComponent {
