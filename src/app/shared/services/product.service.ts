@@ -72,6 +72,7 @@ export class ProductService {
   
     this.allProducts.update(products => [...products, product]);
   }
+  
   /**
    * Adds a transaction to the history.
    */
@@ -91,5 +92,12 @@ export class ProductService {
     this.allProducts.update(products => 
       products.map(p => p.id === updatedProduct.id ? updatedProduct : p)
     );
+  }
+
+  /**
+   * Removes a product from the central signal state by id.
+   */
+  deleteProduct(id: number) {
+    this.allProducts.update(products => products.filter(p => p.id !== id));
   }
 }

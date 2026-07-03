@@ -66,11 +66,14 @@
           <td class="px-5 py-4 text-right">
             @if (editingId() === product.id) {
               <div class="flex justify-end gap-2">
-                <button (click)="saveEdit()" class="font-medium text-success-600 transition hover:text-success-700 dark:text-success-500 dark:hover:text-success-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium  transition shadow-sm">Save</button>
-                <button (click)="cancelEdit()" class="font-medium text-error-600 transition hover:text-error-700 dark:text-error-500 dark:hover:text-error-400  gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Cancel</button>
+                <button (click)="saveEdit()" class="font-medium text-success-600 transition hover:text-success-700 dark:text-success-500 dark:hover:text-success-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Save</button>
+                <button (click)="cancelEdit()" class="font-medium text-error-600 transition hover:text-error-700 dark:text-error-500 dark:hover:text-error-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Cancel</button>
               </div>
             } @else {
-              <button (click)="startEdit(product)" class="font-medium text-brand-500 transition hover:text-brand-600 dark:hover:text-brand-400   gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Edit</button>
+              <div class="flex justify-end gap-2">
+                <button (click)="startEdit(product)" class="font-medium text-brand-500 transition hover:text-brand-600 dark:hover:text-brand-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Edit</button>
+                <button (click)="deleteProduct(product.id)" class="font-medium text-error-600 transition hover:text-error-700 dark:text-error-500 dark:hover:text-error-400 gap-2 rounded-lg px-4 py-2 text-sm font-medium transition shadow-sm">Delete</button>
+              </div>
             }
           </td>
         </tr>

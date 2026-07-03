@@ -23,7 +23,7 @@ export class ProductListTableComponent {
   selected = signal<number[]>([]);
   sort = signal<{ key: keyof Product; asc: boolean }>({ key: 'name', asc: true });
   page = signal<number>(1);
-  perPage = signal<number>(5); // Changed to signal
+  perPage = signal<number>(5); 
   isAddModalOpen = signal<boolean>(false);
 
   // Full Row Editing State
@@ -55,6 +55,18 @@ export class ProductListTableComponent {
   private resetEditState() {
     this.editingId.set(null);
     this.tempProduct.set(null);
+  }
+
+  deleteProduct(id: number) {
+    if (confirm('Are you sure you want to delete this product?')) {
+      this.productService.deleteProduct(id);
+      
+      // Cleanup state if the deleted row was active
+      if (this.editingId() === id) {
+        this.resetEditState();
+      }
+      this.selected.update(list => list.filter(i => i !== id));
+    }
   }
 
   openAddModal() { this.isAddModalOpen.set(true); }
