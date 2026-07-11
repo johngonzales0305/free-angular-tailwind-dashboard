@@ -15,6 +15,7 @@ import { BadgesComponent } from './pages/ui-elements/badges/badges.component';
 import { ButtonsComponent } from './pages/ui-elements/buttons/buttons.component';
 import { ImagesComponent } from './pages/ui-elements/images/images.component';
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
+import { LoginComponent } from './pages/auth-pages/login/login.component';
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
 import { SignUpComponent } from './pages/auth-pages/sign-up/sign-up.component';
 import { CalenderComponent } from './pages/calender/calender.component';
@@ -26,7 +27,12 @@ import { AddProductFormComponent } from './shared/components/ecommerce/add-produ
 
 export const routes: Routes = [
   {
-    path:'',
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path:'dashboard',
     component:AppLayoutComponent,
     children:[
       {
@@ -137,6 +143,11 @@ export const routes: Routes = [
     ]
   },
   // auth pages
+  {
+    path:'login',
+    component:LoginComponent,
+    title:'Login | LT Solutions'
+  },
   {
     path:'signin',
     component:SignInComponent,

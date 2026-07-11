@@ -1,0 +1,98 @@
+<div class="flex min-h-screen w-full bg-white">
+  <!-- Left side: Logo on white background -->
+  <div
+    class="hidden lg:flex lg:w-1/2 items-center justify-center bg-white border-r border-gray-100"
+  >
+    <img
+      src="images/logo/logo2.png"
+      alt="Logo"
+      class="max-w-[70%] object-contain"
+    />
+  </div>
+
+  <!-- Right side: Login form -->
+  <div class="flex w-full lg:w-1/2 items-center justify-center bg-white px-6 py-12">
+    <div class="w-full max-w-md">
+      <!-- Logo shown on small screens -->
+      <div class="mb-8 flex justify-center lg:hidden">
+        <img
+          src="images/logo/logo2.png"
+          alt="Logo"
+          class="max-w-[180px] object-contain"
+        />
+      </div>
+
+      <div class="mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Sign In</h1>
+        <p class="mt-1 text-sm text-gray-500">
+          Enter your username and password to sign in.
+        </p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-5">
+        <!-- Error message -->
+        <div
+          *ngIf="errorMessage"
+          class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <!-- Username -->
+        <div>
+          <label
+            for="username"
+            class="mb-1.5 block text-sm font-medium text-gray-700"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            [(ngModel)]="username"
+            placeholder="Enter your username"
+            autocomplete="username"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label
+            for="password"
+            class="mb-1.5 block text-sm font-medium text-gray-700"
+          >
+            Password
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              name="password"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-12 text-sm text-gray-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
