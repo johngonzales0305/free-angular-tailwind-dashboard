@@ -81,7 +81,7 @@ export class ProductListTableComponent {
     this.closeAddModal();
   }
 
-  // --- Mock Frontend Upload Logic ---
+  // --- Real Base64 Upload Logic for LocalStorage Persistence ---
   onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -90,21 +90,32 @@ export class ProductListTableComponent {
       // Set loading state
       this.isUploading.set(true);
       
-      // Simulate network delay (800ms) for realistic UX
-      setTimeout(() => {
-        // Create a local URL for the preview
-        const localPreviewUrl = URL.createObjectURL(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64ImageUrl = reader.result as string;
         
-        // Update the temp product with the new image URL
+        // Update the temp product with persistent Base64 image
         this.tempProduct.update(currentProduct => {
           if (currentProduct) {
-            return { ...currentProduct, imageUrl: localPreviewUrl } as Product;
+            return { 
+              ...currentProduct, 
+              imageUrl: base64ImageUrl,
+              image: base64ImageUrl 
+            } as Product;
           }
           return currentProduct;
         });
         
         this.isUploading.set(false);
-      }, 800);
+      };
+
+      reader.onerror = () => {
+        console.error('Failed to read uploaded image file');
+        this.isUploading.set(false);
+      };
+
+      // Read file as Base64 Data URL
+      reader.readAsDataURL(file);
     }
   }
 
