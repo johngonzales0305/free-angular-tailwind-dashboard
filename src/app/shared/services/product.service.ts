@@ -9,6 +9,7 @@ export interface Product {
   toSell: number;
   lastUpdated: Date;
   priceLastUpdated: Date;
+  imageUrl?: string; // Optional property for frontend mock upload
 }
 
 export interface Transaction {
@@ -67,7 +68,8 @@ export class ProductService {
       stock: Number(newProduct.stock),
       toSell: 0,
       lastUpdated: new Date(),
-      priceLastUpdated: new Date()
+      priceLastUpdated: new Date(),
+      imageUrl: newProduct.imageUrl || '' // Pass through image URL if present
     };
   
     this.allProducts.update(products => [...products, product]);
@@ -90,7 +92,7 @@ export class ProductService {
 
   updateProduct(updatedProduct: Product) {
     this.allProducts.update(products => 
-      products.map(p => p.id === updatedProduct.id ? updatedProduct : p)
+      products.map(p => p.id === updatedProduct.id ? { ...p, ...updatedProduct, lastUpdated: new Date() } : p)
     );
   }
 

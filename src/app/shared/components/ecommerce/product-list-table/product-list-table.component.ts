@@ -29,6 +29,9 @@ export class ProductListTableComponent {
   // Full Row Editing State
   editingId = signal<number | null>(null);
   tempProduct = signal<Product | null>(null);
+  
+  // Image Upload State
+  isUploading = signal<boolean>(false);
 
   // --- Logic ---
   changePerPage(event: Event) {
@@ -55,6 +58,7 @@ export class ProductListTableComponent {
   private resetEditState() {
     this.editingId.set(null);
     this.tempProduct.set(null);
+    this.isUploading.set(false);
   }
 
   deleteProduct(id: number) {
@@ -75,6 +79,33 @@ export class ProductListTableComponent {
   onProductAdded(newProduct: any) {
     this.productService.addProduct(newProduct);
     this.closeAddModal();
+  }
+
+  // --- Mock Frontend Upload Logic ---
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Set loading state
+      this.isUploading.set(true);
+      
+      // Simulate network delay (800ms) for realistic UX
+      setTimeout(() => {
+        // Create a local URL for the preview
+        const localPreviewUrl = URL.createObjectURL(file);
+        
+        // Update the temp product with the new image URL
+        this.tempProduct.update(currentProduct => {
+          if (currentProduct) {
+            return { ...currentProduct, imageUrl: localPreviewUrl } as Product;
+          }
+          return currentProduct;
+        });
+        
+        this.isUploading.set(false);
+      }, 800);
+    }
   }
 
   // --- Computed ---
