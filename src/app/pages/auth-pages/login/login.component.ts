@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,38 +11,52 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
+  // NOTE: Firebase authenticates by email, so this field is used as the email.
   username = '';
   password = '';
   errorMessage = '';
   showPassword = false;
+  loading = false;
 
-  // Temporary hard-coded credentials (to be replaced by backend auth)
-  private readonly validUsername = 'admin';
-  private readonly validPassword = 'aaaaaa';
-
-  constructor(private router: Router) {}
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.errorMessage = '';
 
     if (!this.username || !this.password) {
-      this.errorMessage = 'Please enter both username and password.';
+      this.errorMessage = 'Please enter both email and password.';
       return;
     }
 
-    // TODO: Replace this with a real backend authentication call.
-    if (
-      this.username === this.validUsername &&
-      this.password === this.validPassword
-    ) {
+    this.loading = true;
+    try {
+      await this.authService.login(this.username, this.password);
       // Successful login - navigate to the dashboard
       this.router.navigate(['/dashboard']);
-    } else {
-      this.errorMessage = 'Invalid username or password.';
+    } catch (error: any) {
+      this.errorMessage = this.mapFirebaseError(error?.code);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private mapFirebaseError(code: string): string {
+    switch (code) {
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        return 'Invalid email or password.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Login failed. Please try again.';
     }
   }
 }
